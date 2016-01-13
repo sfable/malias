@@ -67,8 +67,8 @@ def build_entry(entry, wrap=0, fmt=None):
 					t+=2
 				newv[-1].append(value)
 				t+=lv
-		values = map(vjoin, newv)
-		vjoin = (',\n'+' '*l).join
+			values = map(vjoin, newv)
+			vjoin = (',\n'+' '*l).join
 	return (fmt is None and '{0}: {1}' or fmt).format(name, vjoin(values))
 
 def build_aliases(aliases, wrap=0, fmt=None):
