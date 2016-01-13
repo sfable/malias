@@ -30,27 +30,29 @@ from . import __version__
 
 def run(opts):
 	# PRE
-	dt = dict if opts['--sort'] else OrderedDict
+	if opts['--add'] + opts['--delete'] + opts['--replace'] > 1:
+		print("Multiple change types not allowed")
+		return 1
 	# IN
 	with (opts['--file']=='-' and sys.stdin or open(opts['--file'])) as fp:
-		aliases = dt(load(fp))
+		aliases = OrderedDict(load(fp))
+	# Focus
 	if opts['NAME']:
-		if opts['VALUE']:
-			# Modify Name
-			assert opts['--add'] or opts['--del'] or opts['--replace']
-			if opts['--add']:
+		if opts['--add']:
+			if opts['NAME'] in aliases:
 				for v in opts['VALUE']:
-					if aliases[opts['NAME']].find(v)==-1:
+					if v not in aliases[opts['NAME']]:
 						aliases[opts['NAME']].append(v)
-			elif opts['--sync']:
-				aliases[opts['NAME']][:] = opts['VALUE']
-			elif opts['--del']:
-				for v in opts['VALUE']:
-					i = aliases[opts['NAME']].find(v)
-					if i > -1:
-						aliases[opts['NAME']].pop(i)
+			else:
+				aliases[opts['NAME']] = opts['VALUE']
+		elif opts['--replace']:
+			aliases[opts['NAME']][:] = opts['VALUE']
+		elif opts['--delete']:
+			for v in opts['VALUE']:
+				if v in aliases[opts['NAME']]:
+					aliases[opts['NAME']].pop(aliases[opts['NAME']].index(v))
 		else:
-			# Query Name
+			# Query
 			print('\n'.join(aliases[opts['NAME']]))
 			return
 	# Tweak
@@ -64,9 +66,7 @@ def run(opts):
 
 def main():
 	try:
-		run(docopt.docopt(__doc__, version=__version__))
-	except KeyError, e:
-		print(str(e))
-
-if __name__ == '__main__':
-	main()
+		return run(docopt.docopt(__doc__, version=__version__))
+	except KeyError as e:
+		print("Unknown list: "+str(e))
+	return 2

@@ -1,4 +1,4 @@
-from __future__ import unicode_literals, print_function
+from __future__ import unicode_literals
 
 special_chars='#|@,"\'\r\n\t '
 
@@ -19,7 +19,7 @@ def parse_entry(entry):
 	name, values = split_quote_string(entry, ':')
 	ret = (name.strip(), [])
 	while values:
-		values = split_quote_string(values)
+		values = split_quote_string(values.strip())
 		ret[1].append(values[0].strip())
 		values = values[1:] and values[1] or ''
 	return ret
@@ -35,9 +35,11 @@ def parse_aliases(data, entry=None):
 			if entry is not None:
 				yield parse_entry(entry)
 			entry = line
+	if entry and entry.strip():
+		yield parse_entry(entry)
 
 def loads(data):
-	return parse_aliases(data.split('\n'))
+	return list(parse_aliases(data.split('\n')))
 
 def load(fp):
 	return loads(fp.read())
@@ -60,30 +62,24 @@ def build_entry(entry, wrap=0, fmt=None):
 			newv = []
 			for value in values:
 				lv = len(value)
-				if t and wrap < t+lv:
+				if t and wrap < t+2+lv:
 					t=0
 					newv += [[]]
 				if newv[-1]:
 					t+=2
 				newv[-1].append(value)
 				t+=lv
-			values = map(vjoin, newv)
-			vjoin = (',\n'+' '*l).join
+		else:
+			newv = [[value] for value in values]
+		values = map(vjoin, newv)
+		vjoin = (',\n'+' '*l).join
 	return (fmt is None and '{0}: {1}' or fmt).format(name, vjoin(values))
 
 def build_aliases(aliases, wrap=0, fmt=None):
-	return (build_entry(entry, wrap, fmt) for entry in aliases)
+	return (build_entry(entry, wrap, fmt) for entry in aliases if entry[1])
 
 def dumps(aliases, wrap=0, fmt=None):
 	return '\n'.join(build_aliases(aliases, wrap, fmt))
 
 def dump(aliases, fp, wrap=0, fmt=None):
 	fp.write(dumps(aliases, wrap, fmt)+'\n')
-
-def main(filename='/etc/aliases'):
-	with open(filename) as fp:
-		print(dumps(load(fp)))
-
-if __name__ == '__main__':
-	import sys
-	main(*sys.argv[1:])
