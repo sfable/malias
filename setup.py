@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from malias import __version__
 
@@ -12,7 +12,7 @@ setup(
     description = '',
     url = 'https://github.com/sfable/malias',
     download_url = 'https://github.com/sfable/malias/archive/master.zip',
-    py_modules = ['malias'],
+    packages = find_packages(),
     install_requires = ['docopt'],
     zip_safe = True,
     entry_points = {
