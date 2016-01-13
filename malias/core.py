@@ -21,7 +21,7 @@ def parse_entry(entry):
 	while values:
 		values = split_quote_string(values)
 		ret[1].append(values[0].strip())
-		values = values[1:]
+		values = values[1:] and values[1] or ''
 	return ret
 
 def parse_aliases(data, entry=None):
