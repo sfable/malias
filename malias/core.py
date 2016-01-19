@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-special_chars='#|@,"\'\r\n\t '
+special_chars='#|,"\'\r\n\t '
 
 def split_quote_string(entry, delim=','):
 	if entry[:1] in ('"',"'"):
@@ -47,11 +47,11 @@ def load(fp):
 def build_quote_string(s, chars=special_chars):
 	for c in chars:
 		if c in s:
-			return '"{}"'.format(s.replace('"','\\"'))
+			return '"{0}"'.format(s.replace('"','\\"'))
 	return s
 
 def build_entry(entry, wrap=0, fmt=None):
-	name = build_quote_string(entry[0], chars=':'+special_chars)
+	name = build_quote_string(entry[0], chars=':@'+special_chars)
 	values = map(build_quote_string,entry[1])
 	vjoin = ', '.join
 	if wrap:
